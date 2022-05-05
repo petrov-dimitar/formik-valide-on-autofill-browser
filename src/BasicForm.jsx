@@ -1,31 +1,25 @@
 /** @format */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 
 const Basic = () => {
+  ///do the same for all autofilled fields
   const handleChangeInside = (e) => {
-    setEmail(e.target.value);
-    formik.handleChange(e);
+    setEmail(emailField.current.value);
   };
 
   const emailField = useRef(null);
+
   const [email, setEmail] = useState();
 
   useEffect(() => {
-    console.log(email);
-    formik.setFieldValue("email", email);
+    if (email) {
+      formik.setFieldValue("email", email);
+    }
   }, [email]);
 
-  useEffect(() => {
-    let interval = setInterval(() => {
-      if (emailField.current) {
-        setEmail(emailField.current.value);
-        //do the same for all autofilled fields
-        clearInterval(interval);
-      }
-    }, 100);
-  });
+  //--
 
   const formik = useFormik({
     validate: (values) => {
@@ -33,6 +27,8 @@ const Basic = () => {
       if (!values.email) {
         errors.email = "Required";
       } else if (
+        // Use this to test autofill. Deliberatly deleted @ to show you validation error when you actually auto-fill in using browser an email with @
+        // !/^[A-Z0-9._%+-]+[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
         !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
       ) {
         errors.email = "Invalid email address";
