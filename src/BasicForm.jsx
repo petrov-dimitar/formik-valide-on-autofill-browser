@@ -4,13 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik, useFormik } from "formik";
 
 const Basic = () => {
-  const handleChangeInside = (handleChange, e, validateForm, values) => {
+  const handleChangeInside = (e) => {
     setEmail(e.target.value);
-
-    handleChange(e);
-    console.log(values);
-    validateForm();
-    console.log("onChange Triggered");
+    formik.handleChange(e);
   };
 
   const emailField = useRef(null);
@@ -18,6 +14,7 @@ const Basic = () => {
 
   useEffect(() => {
     console.log(email);
+    formik.setFieldValue("email", email);
   }, [email]);
 
   useEffect(() => {
@@ -31,6 +28,17 @@ const Basic = () => {
   });
 
   const formik = useFormik({
+    validate: (values) => {
+      let errors = {};
+      if (!values.email) {
+        errors.email = "Required";
+      } else if (
+        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
+      ) {
+        errors.email = "Invalid email address";
+      }
+      return errors;
+    },
     initialValues: {
       email: "",
       password: "",
@@ -41,75 +49,19 @@ const Basic = () => {
   });
 
   return (
-    <div>
-      <h1>Anywhere in your app!</h1>
-      <Formik
-        validateOnMount
-        initialValues={{ email: "", password: "" }}
-        validate={(values) => {
-          const errors = {};
-          if (!values.email) {
-            errors.email = "Required";
-          } else if (
-            !/^[A-Z0-9._%+-]+[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-          ) {
-            errors.email = "Invalid email address";
-          }
-          return errors;
-        }}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 400);
-        }}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          isSubmitting,
-          validateForm,
-          /* and other goodies */
-        }) => (
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label>Email</label>
-
-              <input
-                ref={emailField}
-                type="email"
-                name="email"
-                onChange={(e) =>
-                  handleChangeInside(handleChange, e, validateForm, values)
-                }
-                onBlur={handleBlur}
-                onInput={handleBlur}
-                value={values.email}
-              />
-              {errors.email && touched.email && errors.email}
-            </div>
-            <div>
-              <label>password</label>
-              <input
-                type="password"
-                name="password"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                value={values.password}
-              />
-              {errors.password && touched.password && errors.password}
-            </div>
-            <button type="submit" disabled={isSubmitting}>
-              Submit
-            </button>
-          </form>
-        )}
-      </Formik>
-    </div>
+    <form onSubmit={formik.handleSubmit}>
+      <label htmlFor="firstName">Email</label>
+      <input
+        ref={emailField}
+        id="email"
+        name="email"
+        type="text"
+        onChange={handleChangeInside}
+        value={formik.values.email}
+      />
+      {formik.errors.email}
+      <button type="submit">Submit</button>
+    </form>
   );
 };
 export default Basic;
